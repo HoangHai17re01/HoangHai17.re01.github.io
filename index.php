@@ -1,108 +1,55 @@
 <?php
-  require('libs/db.php');
-  session_start();
-  error_reporting(E_ALL);
-  $mod='';
-?>
-<!DOCTYPE html>
-<!-- saved from url=(0018)javascript:void(); -->
-<html lang="vi" itemscope="itemscope" itemtype="http://schema.org/WebPage">
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Index</title>
-  <link href="css/owl.carousel.css" type="text/css" rel="stylesheet">
-  <link href="css/owl.theme.default.min.css" type="text/css" rel="stylesheet">
-  <link href="css/style.min.css" type="text/css" rel="stylesheet">
-  <?php
-    if (isset($_GET['mod'])) {
-      $mod=$_GET['mod'];
-    }
-    if($mod==''){
-      $mod='home';
-    }
-    elseif($mod=='list') {
-      echo '<link href="css/style_listfilm.css" type="text/css" rel="stylesheet">';
-    }
-    elseif($mod=='detail'){
-      echo '<link href="css/style-detail.css" type="text/css" rel="stylesheet">';
-    }
-    elseif ($mod=='watch'){
-      echo '<link rel="stylesheet" type="text/css" media="screen" href="css/style_watch.css" />';
-      echo '<script src="js/watch.js"></script>';
-      echo '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">';
-      echo '<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>';
-      echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>';
-    }
-  ?>
-  <script src="js/jquery.min.js" type="text/javascript"></script>
-  <script src="js/owl.carousel.js" type="text/javascript"></script>
-  <script src="js/jwplayer.js"></script>
-</head>
-<style type="text/css" media="screen">
-    .owl-theme .owl-controls .owl-page {
-      display: inline-block;
-    }
-    .owl-theme .owl-controls .owl-page span {
-      background: none repeat scroll 0 0 #869791;
-      border-radius: 20px;
-      display: block;
-      height: 12px;
-      margin: 5px 7px;
-      opacity: 0.5;
-      width: 12px;
-    }
-</style>
-<style media="screen" type="text/css">
-  .owl-theme .owl-controls .owl-page {
-    display: inline-block;
-  }
-  .owl-theme .owl-controls .owl-page span {
-    background: none repeat scroll 0 0 #869791;
-    border-radius: 20px;
-    display: block;
-    height: 12px;
-    margin: 5px 7px;
-    opacity: 0.5;
-    width: 12px;
-  }
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-  .owl-theme .owl-controls .active span {
-    background-color: white !important;
-  }
+define('LARAVEL_START', microtime(true));
 
-  .owl-theme .owl-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-</style>
-<body>
-  <div id="wrapper">
-    <?php
-      include("header.php");
-    ?>
-    <div id="body-wrap" class="container">
-      <?php
-        include("movie-hot.php");
-      ?>
-      <?php
-        if (isset($_GET['mod'])) {
-          $mod=$_GET['mod'];
-        }
-        if($mod=='')$mod='home';
-        $mod=str_replace('../','',$mod);
-        if(is_file("{$mod}.php"))
-          include("{$mod}.php");
-        else
-          echo 'Invalid URL';
-      ?>
-      <?php
-        include("sidebar.php");
-      ?>
-    </div>
-    <?php
-      include("footer.php");
-    ?>
-  </div>
-</html>
+/*
+|--------------------------------------------------------------------------
+| Check If Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is maintenance / demo mode via the "down" command we
+| will require this file so that any prerendered template can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
+
+if (file_exists(__DIR__.'/Application/storage/framework/maintenance.php')) {
+    require __DIR__.'/Application/storage/framework/maintenance.php';
+}
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
+
+require __DIR__.'/Application/vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
+
+$app = require_once __DIR__.'/Application/bootstrap/app.php';
+
+$kernel = $app->make(Kernel::class);
+
+$response = tap($kernel->handle(
+    $request = Request::capture()
+))->send();
+
+$kernel->terminate($request, $response);
